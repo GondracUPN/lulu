@@ -8,11 +8,25 @@ const CONFIG = {
   musicVolume: 0.25,
   letterTitle: "Feliz cumpleaños, mi princesita",
   paragraphs: [
-    "Cómo me encantaría estar ahí contigo hoy… ir a comer algo rico, salir a pasear, chismear un ratito y simplemente disfrutarte.",
+    "Cómo me encantaría estar ahí contigo hoy... ir a comer algo rico, salir a pasear, chismear un ratito y simplemente disfrutarte.",
     "Te amo muchísimo. Hoy cumples un añito más, mi princesita, y eso me llena de felicidad. Me encantas, me encanta todo de ti, tu forma de ser, tu risa, tus ocurrencias, todo.",
-    "Quiero estar contigo toda la vida, y en algún momento poder celebrarte yo mismo tu cumpleaños en persona… bueno, los dos cumpleaños, porque sé que mereces que te celebren ambos.",
+    "Quiero estar contigo toda la vida, y en algún momento poder celebrarte yo mismo tu cumpleaños en persona... bueno, los dos cumpleaños, porque sé que mereces que te celebren ambos.",
     "Quiero darte muchos detalles, muchas cositas bonitas, pero sobre todo mucho amor.",
     "Espero que me permitas acompañarte en muchos cumpleaños más, mi niñita preciosa. 💖🌷"
+  ],
+  gifts: [
+    {
+      title: "Impresora para mi princesita",
+      description: "La impresora que quiera mi princesita."
+    },
+    {
+      title: "50 pesitos en Shein o Temu",
+      description: "50 pesitos en Shein o Temu. Si me regala un besito, seria para cada tienda."
+    },
+    {
+      title: "Sushisito varias veces",
+      description: "Sushisito varias veces, la cantidad que quiera."
+    }
   ]
 };
 
@@ -27,7 +41,10 @@ const state = {
   width: 0,
   height: 0,
   dpr: Math.min(window.devicePixelRatio || 1, 2),
-  musicEnabled: false
+  musicEnabled: false,
+  giftMode: "blind",
+  revealedGiftIndex: -1,
+  lastFocusedElement: null
 };
 
 const elements = {
@@ -41,7 +58,17 @@ const elements = {
   counterValue: document.getElementById("counterValue"),
   counterNext: document.getElementById("counterNext"),
   closingSection: document.getElementById("closingSection"),
+  openGiftModal: document.getElementById("openGiftModal"),
   backToTop: document.getElementById("backToTop"),
+  giftModal: document.getElementById("giftModal"),
+  closeGiftModal: document.getElementById("closeGiftModal"),
+  giftManual: document.getElementById("giftManual"),
+  giftRandom: document.getElementById("giftRandom"),
+  giftDeck: document.getElementById("giftDeck"),
+  giftStatus: document.getElementById("giftStatus"),
+  giftReveal: document.getElementById("giftReveal"),
+  giftRevealTitle: document.getElementById("giftRevealTitle"),
+  giftRevealText: document.getElementById("giftRevealText"),
   photoFrame: document.getElementById("photoFrame"),
   photo: document.getElementById("photo"),
   canvas: document.getElementById("sky"),
@@ -54,6 +81,7 @@ const ctx = elements.canvas.getContext("2d");
 function init() {
   renderLetter();
   renderPhoto();
+  renderGifts();
   setupMotionPreference();
   setupMusic();
   bindEvents();
@@ -84,14 +112,64 @@ function renderPhoto() {
   elements.photoFrame.classList.add("visible");
 }
 
+function renderGifts() {
+  elements.giftDeck.innerHTML = "";
+
+  CONFIG.gifts.slice(0, 3).forEach((gift, index) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "gift-card";
+    card.dataset.index = String(index);
+    card.setAttribute("aria-label", "Carta sorpresa " + (index + 1));
+
+    const inner = document.createElement("span");
+    inner.className = "gift-card-inner";
+
+    const back = document.createElement("span");
+    back.className = "gift-card-face gift-card-back";
+
+    const mark = document.createElement("span");
+    mark.className = "gift-card-mark";
+    mark.textContent = "?";
+
+    const backLabel = document.createElement("span");
+    backLabel.className = "gift-card-label";
+    backLabel.textContent = "Sorpresa";
+
+    const front = document.createElement("span");
+    front.className = "gift-card-face gift-card-front";
+
+    const title = document.createElement("span");
+    title.className = "gift-card-title";
+
+    const description = document.createElement("span");
+    description.className = "gift-card-copy";
+
+    front.append(title, description);
+    back.append(mark, backLabel);
+    inner.append(back, front);
+    card.appendChild(inner);
+    card.addEventListener("click", handleGiftCardClick);
+    elements.giftDeck.appendChild(card);
+  });
+
+  syncGiftCardContent();
+}
+
 function bindEvents() {
   elements.openLetter.addEventListener("click", revealLetter);
   elements.letterNext.addEventListener("click", showNextLetterStep);
   elements.counterNext.addEventListener("click", revealClosing);
+  elements.openGiftModal.addEventListener("click", openGiftModal);
+  elements.closeGiftModal.addEventListener("click", closeGiftModal);
+  elements.giftManual.addEventListener("click", enableBlindGiftSelection);
+  elements.giftRandom.addEventListener("click", enableVisibleGiftSelection);
+  elements.giftModal.addEventListener("click", handleGiftModalClick);
   elements.backToTop.addEventListener("click", resetExperience);
 
   elements.musicToggle.addEventListener("click", toggleMusic);
   window.addEventListener("resize", resizeCanvas, { passive: true });
+  document.addEventListener("keydown", handleKeyDown);
 
   if (typeof prefersReducedMotion.addEventListener === "function") {
     prefersReducedMotion.addEventListener("change", () => {
@@ -140,9 +218,11 @@ function revealLetter() {
   renderLetter();
   elements.letterPanel.classList.add("visible");
   elements.letterPanel.setAttribute("aria-hidden", "false");
+
   if (CONFIG.musicSrc && CONFIG.musicAutoplayOnOpen) {
     playMusic();
   }
+
   scrollToElement(elements.letterPanel);
   window.setTimeout(() => elements.letterPanel.focus(), state.reduceMotion ? 0 : 260);
 }
@@ -153,6 +233,169 @@ function showNextLetterStep() {
 
 function revealClosing() {
   revealPanel(elements.closingSection);
+}
+
+function openGiftModal() {
+  resetGiftState();
+  state.lastFocusedElement = document.activeElement;
+  elements.body.classList.add("modal-open");
+  elements.giftModal.removeAttribute("hidden");
+  elements.giftModal.setAttribute("aria-hidden", "false");
+  window.setTimeout(() => elements.giftManual.focus(), state.reduceMotion ? 0 : 40);
+}
+
+function closeGiftModal() {
+  hideGiftModal(true);
+}
+
+function hideGiftModal(restoreFocus) {
+  elements.body.classList.remove("modal-open");
+  elements.giftModal.setAttribute("hidden", "");
+  elements.giftModal.setAttribute("aria-hidden", "true");
+
+  if (restoreFocus && state.lastFocusedElement && typeof state.lastFocusedElement.focus === "function") {
+    state.lastFocusedElement.focus();
+  }
+}
+
+function handleGiftModalClick(event) {
+  if (event.target === elements.giftModal) {
+    closeGiftModal();
+  }
+}
+
+function handleKeyDown(event) {
+  if (event.key === "Escape" && !elements.giftModal.hasAttribute("hidden")) {
+    closeGiftModal();
+  }
+}
+
+function enableBlindGiftSelection() {
+  if (state.revealedGiftIndex !== -1) {
+    return;
+  }
+
+  state.giftMode = "blind";
+  updateGiftModeButtons();
+  syncGiftCardContent();
+  elements.giftDeck.classList.remove("show-fronts");
+  elements.giftStatus.textContent = "Toca una carta boca abajo para descubrir tu detalle.";
+}
+
+function enableVisibleGiftSelection() {
+  if (state.revealedGiftIndex !== -1) {
+    return;
+  }
+
+  state.giftMode = "visible";
+  updateGiftModeButtons();
+  syncGiftCardContent();
+  elements.giftDeck.classList.add("show-fronts");
+  elements.giftStatus.textContent = "Ahora puedes ver las tres opciones y elegir la que más quieras.";
+}
+
+function handleGiftCardClick(event) {
+  if (state.revealedGiftIndex !== -1) {
+    return;
+  }
+
+  if (state.giftMode !== "blind" && state.giftMode !== "visible") {
+    elements.giftStatus.textContent = "Primero elige si lo quieres a ciegas o viendo las tres opciones.";
+    return;
+  }
+
+  const giftIndex = Number(event.currentTarget.dataset.index);
+  revealGift(giftIndex);
+}
+
+function revealGift(index) {
+  const cards = getGiftCards();
+  const selectedCard = cards[index];
+  const selectionMode = state.giftMode;
+  const selectedGift = selectionMode === "blind" ? CONFIG.gifts[0] : CONFIG.gifts[index];
+
+  if (!selectedGift || !selectedCard) {
+    return;
+  }
+
+  if (selectionMode === "blind") {
+    setGiftCardContent(selectedCard, selectedGift);
+  }
+
+  state.revealedGiftIndex = index;
+  state.giftMode = "locked";
+  updateGiftModeButtons();
+  elements.giftDeck.classList.toggle("show-fronts", selectionMode === "visible");
+
+  cards.forEach((card, cardIndex) => {
+    const isSelected = cardIndex === index;
+    card.classList.toggle("revealed", selectionMode === "visible" || isSelected);
+    card.classList.toggle("selected", isSelected);
+    card.classList.toggle("muted", !isSelected);
+    card.disabled = true;
+  });
+
+  elements.giftStatus.textContent = selectionMode === "visible"
+    ? "Elegiste viendo las tres opciones."
+    : "Elegiste tu detalle a ciegas.";
+  elements.giftRevealTitle.textContent = selectedGift.title;
+  elements.giftRevealText.textContent = selectedGift.description;
+  elements.giftReveal.removeAttribute("hidden");
+}
+
+function getGiftCards() {
+  return Array.from(elements.giftDeck.querySelectorAll(".gift-card"));
+}
+
+function syncGiftCardContent() {
+  getGiftCards().forEach((card) => {
+    const giftIndex = Number(card.dataset.index);
+    setGiftCardContent(card, CONFIG.gifts[giftIndex]);
+  });
+}
+
+function setGiftCardContent(card, gift) {
+  if (!card || !gift) {
+    return;
+  }
+
+  const title = card.querySelector(".gift-card-title");
+  const description = card.querySelector(".gift-card-copy");
+
+  if (title) {
+    title.textContent = gift.title;
+  }
+
+  if (description) {
+    description.textContent = gift.description;
+  }
+}
+
+function resetGiftState() {
+  state.giftMode = "blind";
+  state.revealedGiftIndex = -1;
+  updateGiftModeButtons();
+  syncGiftCardContent();
+  elements.giftDeck.classList.remove("show-fronts");
+  elements.giftStatus.textContent = "Toca una carta boca abajo para descubrir tu detalle.";
+  elements.giftReveal.setAttribute("hidden", "");
+  elements.giftRevealTitle.textContent = "";
+  elements.giftRevealText.textContent = "";
+
+  getGiftCards().forEach((card) => {
+    card.classList.remove("revealed", "selected", "muted");
+    card.disabled = false;
+  });
+}
+
+function updateGiftModeButtons() {
+  const blindActive = state.giftMode === "blind";
+  const visibleActive = state.giftMode === "visible";
+
+  elements.giftManual.classList.toggle("is-active", blindActive);
+  elements.giftRandom.classList.toggle("is-active", visibleActive);
+  elements.giftManual.setAttribute("aria-pressed", String(blindActive));
+  elements.giftRandom.setAttribute("aria-pressed", String(visibleActive));
 }
 
 function scrollToElement(element) {
@@ -276,6 +519,7 @@ function revealPanel(element) {
 }
 
 function resetExperience() {
+  hideGiftModal(false);
   resetExperienceState();
   elements.body.classList.add("intro-locked");
   scrollToElement(document.getElementById("top"));
@@ -285,6 +529,7 @@ function resetExperienceState() {
   renderLetter();
   hidePanel(elements.counterSection);
   hidePanel(elements.closingSection);
+  resetGiftState();
 }
 
 function hidePanel(element) {
@@ -308,6 +553,7 @@ function resizeCanvas() {
 
   resetScene();
   drawScene(0);
+
   if (!state.reduceMotion) {
     startScene();
   }
@@ -325,6 +571,7 @@ function startScene() {
   if (state.reduceMotion || state.animationFrame) {
     return;
   }
+
   state.animationFrame = requestAnimationFrame(animate);
 }
 
@@ -351,6 +598,7 @@ function buildTulips() {
     const progress = count === 1 ? 0.5 : index / (count - 1);
     const x = state.width * (0.06 + progress * 0.88);
     const scale = 0.7 + Math.random() * 0.6;
+
     tulips.push({
       x,
       y: baseY + 12,
@@ -485,10 +733,12 @@ function drawPetal(x, y, width, height, color, rotation) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(rotation);
+
   const gradient = ctx.createLinearGradient(0, -height * 0.5, 0, height * 0.5);
   gradient.addColorStop(0, "rgba(255, 240, 250, 0.96)");
   gradient.addColorStop(0.32, color);
   gradient.addColorStop(1, "rgba(171, 94, 146, 0.82)");
+
   ctx.fillStyle = gradient;
   ctx.beginPath();
   ctx.moveTo(0, -height * 0.5);

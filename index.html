@@ -56,10 +56,42 @@
       <section id="closingSection" class="panel closing reveal-panel" aria-labelledby="closingHeading" hidden>
         <h2 id="closingHeading" class="sr-only">Cierre</h2>
         <p class="closing-quote">No te dejaré solita nunca.</p>
-        <button id="backToTop" class="btn" type="button">Releer desde el inicio</button>
+        <button id="openGiftModal" class="btn" type="button">Elige un regalo</button>
       </section>
     </section>
   </main>
+
+  <div id="giftModal" class="modal" hidden aria-hidden="true">
+    <div
+      class="modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="giftModalTitle"
+      aria-describedby="giftModalCopy"
+    >
+      <button id="closeGiftModal" class="modal-close" type="button" aria-label="Cerrar regalo">
+        x
+      </button>
+      <p class="eyebrow">Sorpresa final</p>
+      <h2 id="giftModalTitle">Elige un regalo</h2>
+      <p id="giftModalCopy" class="modal-copy">
+        ¿Cómo quieres elegir tu detalle? Puedes hacerlo a ciegas o viendo las tres opciones.
+      </p>
+      <div class="gift-actions">
+        <button id="giftManual" class="btn secondary" type="button">Elegir a ciegas</button>
+        <button id="giftRandom" class="btn" type="button">Elegir viendo</button>
+      </div>
+      <div id="giftDeck" class="gift-deck" aria-label="Cartas sorpresa"></div>
+      <p id="giftStatus" class="gift-status" aria-live="polite">
+        Primero elige si prefieres a ciegas o viendo las tres opciones.
+      </p>
+      <div id="giftReveal" class="gift-reveal" hidden>
+        <h3 id="giftRevealTitle"></h3>
+        <p id="giftRevealText"></p>
+        <button id="backToTop" class="btn secondary" type="button">Volver a leer desde el inicio</button>
+      </div>
+    </div>
+  </div>
 
   <button id="musicToggle" class="music-toggle" type="button" hidden aria-pressed="false">
     Activar música

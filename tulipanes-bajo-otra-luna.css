@@ -51,6 +51,10 @@ body.intro-locked {
   overflow: hidden;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 body.motion-reduced,
 body.motion-reduced * {
   animation-duration: 0.001ms !important;
@@ -411,6 +415,232 @@ body.intro-locked .content {
   text-wrap: balance;
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 7, 18, 0.7);
+  backdrop-filter: blur(18px);
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-dialog {
+  position: relative;
+  width: min(100%, 56rem);
+  max-height: calc(100svh - 2rem);
+  overflow-y: auto;
+  padding: 1.4rem;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(217, 224, 255, 0.16);
+  background:
+    radial-gradient(circle at top, rgba(153, 188, 255, 0.12), transparent 40%),
+    linear-gradient(180deg, rgba(17, 22, 46, 0.94), rgba(10, 14, 28, 0.98));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.modal-copy {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.gift-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+}
+
+.gift-actions .btn,
+.gift-actions .btn.secondary {
+  background: rgba(16, 21, 44, 0.85);
+  border: 1px solid rgba(229, 216, 255, 0.26);
+}
+
+.gift-actions .btn:hover,
+.gift-actions .btn.secondary:hover {
+  background: rgba(27, 35, 72, 0.92);
+}
+
+.gift-actions .btn.is-active,
+.gift-actions .btn.secondary.is-active {
+  background: linear-gradient(135deg, rgba(255, 194, 228, 0.24), rgba(176, 161, 255, 0.24));
+  border-color: rgba(255, 232, 246, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.gift-deck {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+  perspective: 1200px;
+}
+
+.gift-card {
+  padding: 0;
+  min-height: 17rem;
+  border-radius: 1.5rem;
+  background: transparent;
+  border: 0;
+  perspective: 1200px;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.gift-card:disabled {
+  cursor: default;
+}
+
+.gift-card:not(:disabled):hover {
+  transform: translateY(-4px);
+}
+
+.gift-card.muted {
+  opacity: 0.38;
+  transform: scale(0.98);
+}
+
+.gift-card.selected {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.gift-card-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 17rem;
+  transform-style: preserve-3d;
+  transition: transform 700ms ease;
+}
+
+.gift-card.revealed .gift-card-inner {
+  transform: rotateY(180deg);
+}
+
+.gift-deck.show-fronts .gift-card-inner {
+  transform: rotateY(180deg);
+}
+
+.gift-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border-radius: 1.5rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.gift-card-back {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.14), transparent 22%),
+    linear-gradient(160deg, rgba(118, 155, 255, 0.25), rgba(244, 181, 215, 0.24), rgba(31, 40, 82, 0.96));
+  border: 1px solid rgba(243, 236, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.gift-card-back::before {
+  content: "";
+  position: absolute;
+  inset: 0.8rem;
+  border-radius: 1.1rem;
+  border: 1px dashed rgba(255, 245, 252, 0.24);
+}
+
+.gift-card-front {
+  transform: rotateY(180deg);
+  background: linear-gradient(180deg, rgba(255, 244, 249, 0.94), rgba(235, 240, 255, 0.88));
+  color: #1a1730;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+.gift-card.selected .gift-card-front {
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.24);
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.gift-card-mark {
+  position: relative;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(2.8rem, 7vw, 4.4rem);
+  line-height: 1;
+  color: #fff7fb;
+}
+
+.gift-card-label {
+  position: relative;
+  font-size: 0.88rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 246, 252, 0.92);
+}
+
+.gift-card-title {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 3.2vw, 1.8rem);
+  line-height: 1.15;
+}
+
+.gift-card-copy {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: rgba(31, 28, 48, 0.82);
+}
+
+.gift-status {
+  min-height: 1.5rem;
+  margin: 1rem 0 0;
+  color: var(--accent);
+  line-height: 1.5;
+}
+
+.gift-reveal {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gift-reveal h3 {
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+}
+
+.gift-reveal p {
+  margin: 0.6rem 0 1rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -537,6 +767,85 @@ body.intro-locked .content {
     font-size: clamp(1.35rem, 7vw, 1.9rem);
   }
 
+  .modal-dialog {
+    max-height: calc(100svh - 0.8rem);
+    padding: 0.95rem 0.75rem 0.85rem;
+  }
+
+  .gift-actions {
+    gap: 0.45rem;
+    flex-wrap: nowrap;
+  }
+
+  .gift-actions .btn,
+  .gift-actions .btn.secondary {
+    width: auto;
+    min-height: 2.8rem;
+    flex: 1 1 0;
+    padding: 0.72rem 0.7rem;
+    font-size: 0.92rem;
+  }
+
+  .gift-deck {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+  }
+
+  .gift-card,
+  .gift-card-inner {
+    min-height: 9.5rem;
+  }
+
+  .gift-card-face {
+    gap: 0.45rem;
+    padding: 0.75rem 0.45rem;
+    border-radius: 1rem;
+  }
+
+  .gift-card-back::before {
+    inset: 0.45rem;
+    border-radius: 0.8rem;
+  }
+
+  .gift-card-mark {
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+  }
+
+  .gift-card-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+  }
+
+  .gift-card-title {
+    font-size: clamp(0.95rem, 3.8vw, 1.15rem);
+    line-height: 1.08;
+  }
+
+  .gift-card-copy {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .gift-status {
+    margin-top: 0.8rem;
+    font-size: 0.92rem;
+  }
+
+  .gift-reveal {
+    margin-top: 0.85rem;
+    padding: 0.85rem;
+  }
+
+  .gift-reveal h3 {
+    font-size: 1.1rem;
+  }
+
+  .gift-reveal p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
   .music-toggle {
     min-height: 3rem;
     padding: 0.82rem 0.95rem;
@@ -564,6 +873,39 @@ body.intro-locked .content {
 
   .counter-value {
     padding: 0.75rem 0.85rem;
+  }
+
+  .modal-dialog {
+    padding: 0.85rem 0.6rem 0.75rem;
+  }
+
+  .gift-actions .btn,
+  .gift-actions .btn.secondary {
+    min-height: 2.65rem;
+    padding: 0.65rem 0.45rem;
+    font-size: 0.84rem;
+  }
+
+  .gift-deck {
+    gap: 0.35rem;
+  }
+
+  .gift-card,
+  .gift-card-inner {
+    min-height: 8.6rem;
+  }
+
+  .gift-card-face {
+    padding: 0.65rem 0.35rem;
+  }
+
+  .gift-card-title {
+    font-size: 0.88rem;
+  }
+
+  .gift-card-copy {
+    font-size: 0.66rem;
+    line-height: 1.28;
   }
 }
 
