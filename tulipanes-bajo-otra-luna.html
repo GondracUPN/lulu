@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tulipanes bajo otra luna</title>
+  <link rel="stylesheet" href="tulipanes-bajo-otra-luna.css">
+</head>
+<body class="intro-locked">
+  <div class="scene" aria-hidden="true">
+    <div class="moon"></div>
+    <canvas id="sky"></canvas>
+  </div>
+
+  <main class="page">
+    <section class="hero" id="top">
+      <div class="hero-card">
+        <div class="hero-ornament" aria-hidden="true"></div>
+        <p class="eyebrow">Para una noche que sigue eligiendo</p>
+        <h1>Tulipanes bajo otra luna</h1>
+        <p class="hero-subtitle">Aunque estemos bajo cielos distintos, sigo eligiéndote.</p>
+        <div class="hero-actions">
+          <button id="openLetter" class="btn" type="button">Abrir la carta</button>
+        </div>
+        <p class="hero-note">(Hecho con mucho amor.)</p>
+      </div>
+    </section>
+
+    <section class="content" aria-label="Carta y detalles">
+      <article id="letterPanel" class="panel letter-panel" tabindex="-1" aria-hidden="true" hidden>
+        <div class="split">
+          <div>
+            <h2 id="letterHeading">Feliz cumpleaños, mi amor 🌷</h2>
+            <div id="letterBody" class="letter-body"></div>
+            <div class="section-actions">
+              <button id="letterNext" class="btn secondary" type="button">Ver cuánto llevamos</button>
+            </div>
+          </div>
+          <div id="photoFrame" class="photo-frame">
+            <img id="photo" alt="">
+          </div>
+        </div>
+      </article>
+
+      <section id="counterSection" class="panel reveal-panel" aria-labelledby="counterHeading" hidden>
+        <h2 id="counterHeading">Llevamos</h2>
+        <p class="stat-copy">El tiempo no se ha puesto de acuerdo con la distancia.</p>
+        <div class="counter-grid">
+          <div id="counterValue" class="counter-value" aria-live="polite">0 años, 0 meses, 0 días, 00:00:00</div>
+        </div>
+        <div class="section-actions">
+          <button id="counterNext" class="btn secondary" type="button">Seguir</button>
+        </div>
+      </section>
+
+      <section id="closingSection" class="panel closing reveal-panel" aria-labelledby="closingHeading" hidden>
+        <h2 id="closingHeading" class="sr-only">Cierre</h2>
+        <p class="closing-quote">No te dejaré solita nunca.</p>
+        <button id="backToTop" class="btn" type="button">Releer desde el inicio</button>
+      </section>
+    </section>
+  </main>
+
+  <button id="musicToggle" class="music-toggle" type="button" hidden aria-pressed="false">
+    Activar música
+  </button>
+  <audio id="bgMusic" loop preload="none" aria-hidden="true"></audio>
+
+  <script src="tulipanes-bajo-otra-luna.js"></script>
+</body>
+</html>
