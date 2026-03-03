@@ -339,7 +339,8 @@ function revealGift(index) {
     ? "Elegiste viendo las tres opciones."
     : "Elegiste tu detalle a ciegas.";
   elements.giftRevealTitle.textContent = selectedGift.title;
-  elements.giftRevealText.textContent = selectedGift.description;
+  elements.giftRevealText.textContent =
+    selectedGift.description + " Enviame captura porfi para saber que gano mi niñita preciosa.";
   elements.giftReveal.removeAttribute("hidden");
 }
 
